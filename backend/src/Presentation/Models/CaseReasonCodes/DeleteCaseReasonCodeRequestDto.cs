@@ -1,0 +1,3 @@
+namespace Presentation.Models.CaseReasonCodes;
+
+public record DeleteCaseReasonCodeRequestDto : OrganizationCaseReasonCodeRequestDto;

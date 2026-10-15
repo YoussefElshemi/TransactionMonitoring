@@ -1,0 +1,11 @@
+using Core.Models.Common;
+using Core.ValueObjects;
+
+namespace Core.Models.Transactions;
+
+public record ListTransactionRequest : PagedRequest
+{
+    public required OrganizationId OrganizationId { get; init; }
+    public required FriendlyName? FriendlyName { get; init; }
+    public required ExternalReference? ExternalReference { get; init; }
+}

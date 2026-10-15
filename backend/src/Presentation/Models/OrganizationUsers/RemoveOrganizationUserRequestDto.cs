@@ -1,0 +1,3 @@
+﻿namespace Presentation.Models.OrganizationUsers;
+
+public record RemoveOrganizationUserRequestDto : OrganizationUserRequestDto;

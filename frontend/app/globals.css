@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-50: 24 100% 97.1%;
+    --brand-100: 24.6 95.1% 92%;
+    --brand-200: 23 94.8% 84.9%;
+    --brand-300: 40.4 95% 60.8%;
+    --brand-400: 36.8 100% 61%;
+    --brand-500: 26.9 86.1% 60.4%;
+    --brand-600: 17.9 100% 62%;
+    --brand-700: 9.7 90.5% 58.6%;
+    --brand-800: 16.3 85.5% 43.1%;
+    --brand-900: 16.3 85.7% 32.9%;
+
+    --settled-50: 38.8 100% 96.7%;
+    --settled-100: 39.5 95.3% 91.6%;
+    --settled-200: 40 94.9% 84.5%;
+    --settled-500: 40.4 95% 60.8%;
+    --settled-700: 40.3 87.7% 32%;
+
+    --inflight-50: 36.7 100% 96.5%;
+    --inflight-100: 36.6 95.3% 91.6%;
+    --inflight-200: 36.8 94.9% 84.5%;
+    --inflight-500: 36.8 100% 61%;
+    --inflight-700: 36.6 88.3% 33.5%;
+
+    --attention-50: 26.3 88.9% 96.5%;
+    --attention-100: 25.9 86% 91.6%;
+    --attention-200: 27 87.3% 84.5%;
+    --attention-500: 26.9 86.1% 60.4%;
+    --attention-700: 26.9 86.4% 37.5%;
+
+    --elevated-50: 16.7 100% 96.5%;
+    --elevated-100: 17.6 95.3% 91.6%;
+    --elevated-200: 17.6 94.9% 84.5%;
+    --elevated-500: 17.9 100% 62%;
+    --elevated-700: 17.7 87.7% 41.6%;
+
+    --critical-50: 11.2 88.9% 96.5%;
+    --critical-100: 9.2 90.7% 91.6%;
+    --critical-200: 9.3 89.9% 84.5%;
+    --critical-500: 9.7 90.5% 58.6%;
+    --critical-700: 9.6 87.7% 44.5%;
+
+    /**
+     * The solid Blocked/Rejected/Failed/Critical chip, as an explicit pair.
+     *
+     * It cannot be spelled `bg-critical-700 text-white`, because the two steps
+     * have to move in opposite directions between themes: in light the fill is
+     * dark and the text white, in dark the fill becomes vivid Tomato and the
+     * text goes near-black. Binding them together keeps the pair legible in
+     * both rather than inverting into 2.9:1 mush.
+     */
+    --critical-solid: var(--critical-700);
+    --critical-solid-foreground: 0 0% 100%;
+
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96.1%;
+    --slate-200: 214.3 31.8% 91.4%;
+    --slate-300: 212.7 26.8% 83.9%;
+    --slate-400: 215 20.2% 65.1%;
+    --slate-500: 215.4 16.3% 46.9%;
+    --slate-600: 215.3 19.3% 34.5%;
+    --slate-700: 215.3 25% 26.7%;
+    --slate-800: 217.2 32.6% 17.5%;
+    --slate-900: 222.2 47.4% 11.2%;
+    --slate-950: 228.6 84% 4.9%;
+
+    --console: 222.9 48.8% 8.4%;
+    --console-border: 217.2 32.6% 17.5%;
+    --console-200: 214.3 31.8% 91.4%;
+    --console-300: 212.7 26.8% 83.9%;
+    --console-400: 215 20.2% 65.1%;
+    --console-500: 215.4 16.3% 46.9%;
+    --console-600: 215.3 19.3% 34.5%;
+    --console-700: 215.3 25% 26.7%;
+
+    --background: 210 40% 98%;
+    --foreground: 222.2 84.9% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84.9% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84.9% 4.1%;
+    --primary: var(--brand-800);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: var(--brand-50);
+    --accent-foreground: var(--brand-900);
+    /* Solid fill carrying white text, so it takes the -700 step: Tomato itself
+     * is only 3.37:1 against white. */
+    --destructive: var(--critical-700);
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: var(--brand-800);
+    --radius: 0.375rem;
+  }
+
+  .dark {
+    --slate-50: 222.2 47.4% 11.2%;
+    --slate-100: 217.2 32.6% 17.5%;
+    --slate-200: 215.3 25% 26.7%;
+    --slate-300: 215.3 19.3% 34.5%;
+    --slate-400: 215 20.2% 65.1%;
+    --slate-500: 212.7 26.8% 83.9%;
+    --slate-600: 214.3 31.8% 91.4%;
+    --slate-700: 210 40% 96.1%;
+    --slate-800: 210 40% 98%;
+    --slate-900: 0 0% 100%;
+    --slate-950: 0 0% 100%;
+
+    --brand-50: 17.8 42.9% 12.4%;
+    --brand-100: 17.1 40.2% 17.1%;
+    --brand-200: 17.3 37.7% 27.1%;
+    --brand-800: 18 100% 70%;
+    --brand-900: 17.7 100% 78%;
+
+    --settled-50: 42.2 42.9% 12.4%;
+    --settled-100: 39.4 40.2% 17.1%;
+    --settled-200: 40.4 37.7% 27.1%;
+    --settled-700: 40.5 91.6% 57.8%;
+
+    --inflight-50: 37.8 42.9% 12.4%;
+    --inflight-100: 36 40.2% 17.1%;
+    --inflight-200: 36.9 37.7% 27.1%;
+    --inflight-700: 36.9 91.6% 57.8%;
+
+    --attention-50: 26.7 42.9% 12.4%;
+    --attention-100: 27.4 40.2% 17.1%;
+    --attention-200: 26.5 37.7% 27.1%;
+    --attention-700: 27.1 91.6% 57.8%;
+
+    --elevated-50: 17.8 42.9% 12.4%;
+    --elevated-100: 17.1 40.2% 17.1%;
+    --elevated-200: 17.3 37.7% 27.1%;
+    --elevated-700: 18 91.6% 57.8%;
+
+    --critical-50: 11.1 42.9% 12.4%;
+    --critical-100: 10.3 40.2% 17.1%;
+    --critical-200: 9.2 37.7% 27.1%;
+    --critical-700: 9.7 91.6% 57.8%;
+
+    --critical-solid: var(--critical-500);
+    --critical-solid-foreground: 222.9 48.8% 8.4%;
+
+    --background: 222.2 47.4% 11.2%;
+    --foreground: 0 0% 100%;
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 217.2 32.6% 17.5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: var(--brand-600);
+    --primary-foreground: 222.9 48.8% 8.4%;
+    --secondary: 215.3 25% 26.7%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: var(--brand-100);
+    --accent-foreground: var(--brand-900);
+    --destructive: var(--critical-solid);
+    --destructive-foreground: var(--critical-solid-foreground);
+    --border: 215.3 25% 26.7%;
+    --input: 215.3 25% 26.7%;
+    --ring: var(--brand-800);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+}

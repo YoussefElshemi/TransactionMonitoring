@@ -1,0 +1,3 @@
+namespace Presentation.Models.NotificationSubscriptions;
+
+public record DeleteNotificationSubscriptionRequestDto : NotificationSubscriptionRequestDto;

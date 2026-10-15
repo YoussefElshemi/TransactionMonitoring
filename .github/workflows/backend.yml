@@ -1,0 +1,80 @@
+name: Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: transaction_monitoring
+        ports:
+          - 35434:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      webhook:
+        image: ghcr.io/tarampampam/webhook-tester:2
+        env:
+          AUTO_CREATE_SESSIONS: true
+        ports:
+          - 5746:8080
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Migration Script
+      run: psql -d postgresql://postgres@localhost/transaction_monitoring -f Migration.sql
+      working-directory: backend/src/Infrastructure/Scripts
+      env:
+        PGPASSWORD: postgres
+        PGPORT: 35434
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the solution
+      run: dotnet build --no-restore --configuration Debug
+
+    - name: Run Unit Tests
+      run: dotnet test tests/UnitTests --no-build --configuration Debug --logger:"trx;LogFileName=unit_tests.trx"
+
+    - name: Run Behavioural Tests
+      run: dotnet test tests/BehaviouralTests --no-build --configuration Debug --logger:"trx;LogFileName=behavioural_tests.trx"
+
+    - name: Publish Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: '**/*.trx'

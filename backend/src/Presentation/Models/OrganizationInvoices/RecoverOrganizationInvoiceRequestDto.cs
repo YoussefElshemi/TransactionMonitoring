@@ -1,0 +1,3 @@
+﻿namespace Presentation.Models.OrganizationInvoices;
+
+public record RecoverOrganizationInvoiceRequestDto : OrganizationInvoiceRequestDto;

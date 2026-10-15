@@ -1,0 +1,3 @@
+﻿namespace Presentation.Models.WebhookConfigurations;
+
+public record RecoverOrganizationWebhookConfigurationRequestDto : OrganizationWebhookConfigurationRequestDto;

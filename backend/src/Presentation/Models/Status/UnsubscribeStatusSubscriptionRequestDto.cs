@@ -1,0 +1,3 @@
+namespace Presentation.Models.Status;
+
+public record UnsubscribeStatusSubscriptionRequestDto : ConfirmStatusSubscriptionRequestDto;

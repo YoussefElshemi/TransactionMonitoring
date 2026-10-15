@@ -1,0 +1,3 @@
+namespace Presentation.Models.Escalations;
+
+public record DeleteEscalationRuleRequestDto : OrganizationEscalationRuleRequestDto;

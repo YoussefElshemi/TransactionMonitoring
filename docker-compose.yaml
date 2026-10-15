@@ -1,0 +1,63 @@
+﻿services:
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard
+    container_name: transaction-monitoring-aspire-dashboard
+    ports:
+      - "18888:18888"
+      - "4317:18889"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+
+  postgres:
+    image: postgres:15.4-bullseye
+    container_name: transaction-monitoring-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=transaction_monitoring
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "35433:5432"
+    volumes:
+      - ./backend/src/Infrastructure/Scripts/Migration.sql:/docker-entrypoint-initdb.d/init.sql
+
+  test-postgres:
+    image: postgres:15.4-bullseye
+    container_name: transaction-monitoring-test-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=transaction_monitoring
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "35434:5432"
+    volumes:
+      - ./backend/src/Infrastructure/Scripts/Migration.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: transaction-monitoring-redis
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "36379:6379"
+
+  webhook:
+    image: ghcr.io/tarampampam/webhook-tester:2.3
+    container_name: webhook-server
+    restart: always
+    environment:
+      - AUTO_CREATE_SESSIONS=true
+    ports:
+      - "5746:8080"
