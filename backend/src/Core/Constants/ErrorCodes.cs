@@ -18,6 +18,7 @@ public static class ErrorCodes
     public const string RequestFailed = "request_failed";
 
     public const string InvalidMode = "invalid_mode";
+    public const string ModeMismatch = "mode_mismatch";
     public const string InvalidIdempotencyKey = "invalid_idempotency_key";
     public const string IdempotencyRequestInProgress = "idempotency_request_in_progress";
     public const string IdempotencyKeyReused = "idempotency_key_reused";

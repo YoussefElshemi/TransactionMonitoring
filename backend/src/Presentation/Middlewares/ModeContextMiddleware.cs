@@ -13,9 +13,18 @@ public class ModeContextMiddleware(RequestDelegate next)
     {
         var requested = context.Request.Headers[ModeConstants.ModeHeader];
 
-        if (!string.IsNullOrWhiteSpace(requested) && !ModeHeaderHelper.TryParse(requested, out _))
+        if (!string.IsNullOrWhiteSpace(requested))
         {
-            return RejectAsync(context, requested!);
+            if (!ModeHeaderHelper.TryParse(requested, out var requestedMode))
+            {
+                return RejectInvalidAsync(context, requested!);
+            }
+
+            // Relies on UseAuthorization running first: the API-scope policies are what authenticate the client scheme.
+            if (context.User.IsApiClient() && context.User.GetMode() != requestedMode)
+            {
+                return RejectMismatchAsync(context, ModeHeaderHelper.ToHeaderValue(requestedMode));
+            }
         }
 
         context.Response.OnStarting(() =>
@@ -28,19 +37,35 @@ public class ModeContextMiddleware(RequestDelegate next)
         return next(context);
     }
 
-    private static Task RejectAsync(HttpContext context, string requested)
+    private static Task RejectInvalidAsync(HttpContext context, string requested)
+    {
+        return RejectAsync(context, StatusCodes.Status400BadRequest, "Bad Request",
+            $"'{requested}' is not a valid {ModeConstants.ModeHeader}. " +
+            $"Use '{ModeConstants.Live}' or '{ModeConstants.Test}'.",
+            ErrorCodes.InvalidMode);
+    }
+
+    private static Task RejectMismatchAsync(HttpContext context, string requested)
+    {
+        var issued = ModeHeaderHelper.ToHeaderValue(context.User.GetMode());
+
+        return RejectAsync(context, StatusCodes.Status403Forbidden, "Forbidden",
+            $"This API client's key was issued in '{issued}' mode and cannot be used for '{requested}'. " +
+            $"Use a {requested} key, or omit {ModeConstants.ModeHeader}.",
+            ErrorCodes.ModeMismatch);
+    }
+
+    private static Task RejectAsync(HttpContext context, int statusCode, string title, string detail, string errorCode)
     {
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Bad Request",
-            Detail =
-                $"'{requested}' is not a valid {ModeConstants.ModeHeader}. " +
-                $"Use '{ModeConstants.Live}' or '{ModeConstants.Test}'.",
+            Status = statusCode,
+            Title = title,
+            Detail = detail,
             Instance = context.Request.Path
-        }.WithContract(context, ErrorCodes.InvalidMode);
+        }.WithContract(context, errorCode);
 
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.StatusCode = statusCode;
 
         return context.Response.WriteAsJsonAsync(problemDetails, context.RequestAborted);
     }

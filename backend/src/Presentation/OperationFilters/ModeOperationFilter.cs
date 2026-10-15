@@ -23,8 +23,10 @@ public class ModeOperationFilter : IOperationFilter
                 "rather than the live meter.\n\n" +
                 "Omitting the header is treated as " + $"`{ModeConstants.Live}`. Any other value is rejected " +
                 "with 400 rather than defaulted.\n\n" +
-                "**Ignored when authenticating as an API client:** a client's mode is the one its key was " +
-                $"issued in, so a `{ModeConstants.Test}` key is served the sandbox whatever this header says. " +
+                "**API clients are bound to the mode their key was issued in.** A " +
+                $"`{ModeConstants.Live}` key may only call `{ModeConstants.Live}` and a `{ModeConstants.Test}` key " +
+                "only `" + ModeConstants.Test + "`; naming the other mode is rejected with 403 `mode_mismatch`. " +
+                "Omitting the header serves the key's own mode. " +
                 "The response always carries the mode the request was actually served under.",
             Schema = new OpenApiSchema
             {
@@ -52,6 +54,11 @@ public class ModeOperationFilter : IOperationFilter
         operation.Responses.TryAdd(((int)HttpStatusCode.BadRequest).ToString(), new OpenApiResponse
         {
             Description = $"{ModeConstants.ModeHeader} was supplied but is not {ModeConstants.Live} or {ModeConstants.Test}."
+        });
+
+        operation.Responses.TryAdd(((int)HttpStatusCode.Forbidden).ToString(), new OpenApiResponse
+        {
+            Description = $"An API client named a {ModeConstants.ModeHeader} other than the mode its key was issued in."
         });
     }
 }

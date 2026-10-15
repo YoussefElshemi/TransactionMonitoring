@@ -9,5 +9,6 @@ public static class OAuthConstants
     public const string InvalidClient = "invalid_client";
     public const string InvalidGrant = "invalid_grant";
     public const string InvalidScope = "invalid_scope";
+    public const string UnauthorizedClient = "unauthorized_client";
     public const string UnsupportedGrantType = "unsupported_grant_type";
 }

@@ -23,6 +23,8 @@ public static class ErrorCatalogue
             "Authentication is missing, expired or invalid."),
         Define(ErrorCodes.Forbidden, HttpStatusCode.Forbidden,
             "The caller is authenticated but may not perform this operation."),
+        Define(ErrorCodes.ModeMismatch, HttpStatusCode.Forbidden,
+            "The mode header names a partition the API client's key was not issued in. Live keys serve only live, test keys only test."),
         Define(ErrorCodes.NotFound, HttpStatusCode.NotFound,
             "The resource does not exist, or exists in a partition or organization the caller cannot see."),
         Define(ErrorCodes.Conflict, HttpStatusCode.Conflict,

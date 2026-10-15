@@ -172,6 +172,12 @@ public class OAuthController(
 
     private IActionResult IssueToken(Guid apiClientId, Guid apiClientSecretId, string clientId, Guid organizationId, List<ApiScope> apiScopes, Mode mode, string apiVersion)
     {
+        if (ModeHeaderHelper.TryParse(Request.Headers[ModeConstants.ModeHeader], out var requestedMode) && requestedMode != mode)
+        {
+            return Error(StatusCodes.Status400BadRequest, OAuthConstants.UnauthorizedClient,
+                $"This client was issued in '{ModeHeaderHelper.ToHeaderValue(mode)}' mode and cannot obtain a token for '{ModeHeaderHelper.ToHeaderValue(requestedMode)}'.");
+        }
+
         var options = Options;
         var utcNow = timeProvider.GetUtcNow();
         var principal = BuildPrincipal(apiClientId, apiClientSecretId, clientId, organizationId, apiScopes, mode, apiVersion);

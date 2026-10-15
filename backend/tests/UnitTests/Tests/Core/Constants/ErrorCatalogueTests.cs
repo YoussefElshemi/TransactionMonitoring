@@ -77,6 +77,7 @@ public class ErrorCatalogueTests : BaseTestClass
         "unsupported_api_version",
         "unauthorized",
         "forbidden",
+        "mode_mismatch",
         "not_found",
         "conflict",
         "idempotency_request_in_progress",
