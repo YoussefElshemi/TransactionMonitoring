@@ -105,7 +105,7 @@ public class TransactionRepository(
     {
         var result = await context.Database
             .SqlQueryRaw<int>($"SELECT nextval('\"{Schemas.Service}\".\"{Sequences.TransactionNumber}\"') as \"Value\"")
-            .FirstAsync(stoppingToken);
+            .SingleAsync(stoppingToken);
 
         return new FriendlyName("TX" + result.ToString("D10"));
     }

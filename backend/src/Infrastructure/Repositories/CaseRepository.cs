@@ -580,7 +580,7 @@ public class CaseRepository(
     {
         var result = await context.Database
             .SqlQueryRaw<int>($"SELECT nextval('\"{Schemas.Service}\".\"{Sequences.CaseNumber}\"') as \"Value\"")
-            .FirstAsync(stoppingToken);
+            .SingleAsync(stoppingToken);
 
         return new FriendlyName("CA" + result.ToString("D10"));
     }

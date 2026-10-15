@@ -138,7 +138,7 @@ public class AlertRepository(
     {
         var result = await context.Database
             .SqlQueryRaw<int>($"SELECT nextval('\"{Schemas.Service}\".\"{Sequences.AlertNumber}\"') as \"Value\"")
-            .FirstAsync(stoppingToken);
+            .SingleAsync(stoppingToken);
 
         return new FriendlyName("AL" + result.ToString("D10"));
     }

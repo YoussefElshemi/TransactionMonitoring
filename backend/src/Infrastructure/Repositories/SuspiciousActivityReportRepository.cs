@@ -131,7 +131,7 @@ public class SuspiciousActivityReportRepository(
     {
         var result = await context.Database
             .SqlQueryRaw<int>($"SELECT nextval('\"{Schemas.Service}\".\"{Sequences.SuspiciousActivityReportNumber}\"') as \"Value\"")
-            .FirstAsync(stoppingToken);
+            .SingleAsync(stoppingToken);
 
         return new FriendlyName("SAR" + result.ToString("D10"));
     }

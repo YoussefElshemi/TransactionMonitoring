@@ -105,7 +105,7 @@ public class IncidentRepository(
     {
         var result = await context.Database
             .SqlQueryRaw<int>($"SELECT nextval('\"{Schemas.Service}\".\"{Sequences.IncidentNumber}\"') as \"Value\"")
-            .FirstAsync(stoppingToken);
+            .SingleAsync(stoppingToken);
 
         return new IncidentNumber(StatusConstants.IncidentNumberPrefix + result.ToString("D10"));
     }
