@@ -165,36 +165,72 @@ public class SandboxModeTests(TestFixture testFixture) : IClassFixture<TestFixtu
         created.ClientSecret.ToString().Should().NotStartWith("tmsec_test_");
     }
 
-    [Fact]
-    public async Task ApiClientRequest_AskingForLiveWithATestKey_IsStillServedTheSandbox()
+    [Theory]
+    [InlineData(Mode.Test, ModeConstants.Live)]
+    [InlineData(Mode.Live, ModeConstants.Test)]
+    public async Task ApiClientRequest_AskingForTheOtherMode_IsRefused(Mode keyMode, string requestedMode)
     {
         // Arrange
-        var created = await AuthenticationHelper.CreateApiClientAsync(testFixture.Services, new CreateApiClientRequest
-        {
-            FriendlyName = new FriendlyName("sandbox key"),
-            UserId = new ApplicationUserId(_userId),
-            OrganizationId = new OrganizationId(OrganizationId),
-            Scopes = [ApiScope.RuleSetsEvaluate]
-        }, Mode.Test);
+        using var apiClient = await CreateEvaluatingApiClientAsync(keyMode);
 
-        using var apiClient = testFixture.CreateClient();
-
-        await AuthenticationHelper.SetClientCredentialsTokenAsync(
-            apiClient, created.ApiClient.ClientId, created.ClientSecret);
-
-        apiClient.DefaultRequestHeaders.Add(ModeConstants.ModeHeader, ModeConstants.Live);
-
-        var request = new HttpRequestMessage(HttpMethod.Post, "/rule-sets/evaluate")
-        {
-            Content = JsonContent.Create(new { amount = 10 })
-        };
+        apiClient.DefaultRequestHeaders.Add(ModeConstants.ModeHeader, requestedMode);
 
         // Act
-        var response = await apiClient.SendAsync(request);
+        var response = await apiClient.SendAsync(EvaluateRequest());
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain(ErrorCodes.ModeMismatch);
+    }
+
+    [Theory]
+    [InlineData(Mode.Test, ModeConstants.Test)]
+    [InlineData(Mode.Live, ModeConstants.Live)]
+    [InlineData(Mode.Test, null)]
+    public async Task ApiClientRequest_InItsOwnModeOrWithNoHeader_IsServedInTheKeysMode(Mode keyMode, string? requestedMode)
+    {
+        // Arrange
+        using var apiClient = await CreateEvaluatingApiClientAsync(keyMode);
+
+        if (requestedMode is not null)
+        {
+            apiClient.DefaultRequestHeaders.Add(ModeConstants.ModeHeader, requestedMode);
+        }
+
+        // Act
+        var response = await apiClient.SendAsync(EvaluateRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Headers.GetValues(ModeConstants.ModeHeader).Should().ContainSingle(ModeConstants.Test);
+        response.Headers.GetValues(ModeConstants.ModeHeader).Should().ContainSingle(ModeHeaderHelper.ToHeaderValue(keyMode));
+    }
+
+    [Theory]
+    [InlineData(Mode.Test, ModeConstants.Live)]
+    [InlineData(Mode.Live, ModeConstants.Test)]
+    public async Task Token_AskingForTheOtherMode_IsRefused(Mode keyMode, string requestedMode)
+    {
+        // Arrange
+        var created = await CreateEvaluatingKeyAsync(keyMode);
+
+        using var apiClient = testFixture.CreateClient();
+        apiClient.DefaultRequestHeaders.Add(ModeConstants.ModeHeader, requestedMode);
+
+        // Act
+        var response = await AuthenticationHelper.PostTokenFormAsync(apiClient, new Dictionary<string, string>
+        {
+            ["grant_type"] = OAuthConstants.ClientCredentialsGrantType,
+            ["client_id"] = created.ApiClient.ClientId,
+            ["client_secret"] = created.ClientSecret
+        });
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain(OAuthConstants.UnauthorizedClient);
     }
 
     [Fact]
@@ -555,6 +591,35 @@ public class SandboxModeTests(TestFixture testFixture) : IClassFixture<TestFixtu
             OrganizationId = new OrganizationId(OrganizationId),
             Scopes = [ApiScope.RulesEvaluate]
         }, Mode.Test);
+    }
+
+    private Task<CreatedApiClient> CreateEvaluatingKeyAsync(Mode mode)
+    {
+        return AuthenticationHelper.CreateApiClientAsync(testFixture.Services, new CreateApiClientRequest
+        {
+            FriendlyName = new FriendlyName($"{ModeHeaderHelper.ToHeaderValue(mode)} key"),
+            UserId = new ApplicationUserId(_userId),
+            OrganizationId = new OrganizationId(OrganizationId),
+            Scopes = [ApiScope.RuleSetsEvaluate]
+        }, mode);
+    }
+
+    private async Task<HttpClient> CreateEvaluatingApiClientAsync(Mode mode)
+    {
+        var created = await CreateEvaluatingKeyAsync(mode);
+        var apiClient = testFixture.CreateClient();
+
+        await AuthenticationHelper.SetClientCredentialsTokenAsync(apiClient, created.ApiClient.ClientId, created.ClientSecret);
+
+        return apiClient;
+    }
+
+    private static HttpRequestMessage EvaluateRequest()
+    {
+        return new HttpRequestMessage(HttpMethod.Post, "/rule-sets/evaluate")
+        {
+            Content = JsonContent.Create(new { amount = 10 })
+        };
     }
 
     private async Task<SandboxCreditResponseDto> ReadCreditsAsync()
